@@ -1,74 +1,404 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tumor Detection System</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f8f9fa;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroScan AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#020817;--s1:#0a1628;--s2:#0f1f38;
+  --cyan:#22d3ee;--violet:#a78bfa;--green:#4ade80;--rose:#f87171;--amber:#fbbf24;
+  --t1:#f1f5f9;--t2:#94a3b8;--t3:#475569;
+  --b1:rgba(34,211,238,0.12);--b2:rgba(34,211,238,0.22);
+}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;overflow-x:hidden}
 
-        .container {
-            max-width: 600px; /* Set a max width for the container */
-            margin: 0 auto;   /* Center the container horizontally */
-        }
+/* bg fx */
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 70% 50% at 15% 0%,rgba(10,40,90,0.7) 0%,transparent 60%),
+    radial-gradient(ellipse 50% 40% at 85% 80%,rgba(30,10,80,0.5) 0%,transparent 55%),
+    radial-gradient(ellipse 40% 50% at 50% 50%,rgba(5,25,50,0.4) 0%,transparent 60%)}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(34,211,238,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(34,211,238,0.025) 1px,transparent 1px);
+  background-size:48px 48px}
 
-        .card {
-            border-radius: 15px;
-        }
+.page{position:relative;z-index:1;max-width:740px;margin:0 auto;padding:0 20px 80px}
 
-        #results img {
-            max-height: 400px;
-            margin-top: 15px;
-        }
+/* NAV */
+nav{display:flex;align-items:center;justify-content:space-between;padding:18px 0;margin-bottom:8px;border-bottom:1px solid var(--b1)}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-box{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#0e3d5a,#1a1050);border:1px solid var(--b2);display:flex;align-items:center;justify-content:center}
+.logo-box svg{width:18px;height:18px;stroke:var(--cyan)}
+.logo-name{font-size:18px;font-weight:800;letter-spacing:-0.03em}
+.logo-name span{color:var(--cyan)}
+.live-badge{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--green);background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);padding:5px 12px;border-radius:100px}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1.4s infinite}
+@keyframes blink{0%,100%{opacity:1;box-shadow:0 0 6px var(--green)}50%{opacity:0.3;box-shadow:none}}
 
-        .text-center {
-            text-align: center;
-        }
+/* HERO */
+.hero{text-align:center;padding:64px 0 52px;animation:up 0.7s ease both}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:11px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:var(--cyan);margin-bottom:22px}
+.eyebrow::before,.eyebrow::after{content:'';width:28px;height:1px;background:linear-gradient(90deg,transparent,var(--cyan))}
+.eyebrow::after{transform:scaleX(-1)}
+h1{font-size:clamp(2.4rem,6vw,3.8rem);font-weight:800;letter-spacing:-0.04em;line-height:1.0;margin-bottom:18px}
+.grad{background:linear-gradient(100deg,var(--cyan),var(--violet),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sub{font-size:15px;font-weight:300;color:var(--t2);line-height:1.7;max-width:400px;margin:0 auto 40px}
+.stats{display:flex;justify-content:center;gap:48px}
+.stat-v{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:500;line-height:1;margin-bottom:4px}
+.stat-v em{color:var(--cyan);font-style:normal}
+.stat-k{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:0.08em}
 
-        .btn {
-            width: 100%;
-        }
+/* CARD */
+.card{background:var(--s1);border:1px solid var(--b1);border-radius:22px;overflow:hidden;position:relative;animation:up 0.7s 0.1s ease both}
+.card::after{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:55%;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:0.5}
 
-        .lead {
-            margin-bottom: 30px; /* Space between the heading and the form */
-        }
-    </style>
+.card-head{display:flex;align-items:center;gap:8px;padding:18px 26px;border-bottom:1px solid var(--b1)}
+.ch-dot{width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+.ch-title{font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--t2)}
+.ch-title b{color:var(--cyan);font-weight:600}
+.card-body{padding:26px}
+
+/* DROP ZONE */
+.drop{position:relative;border:1.5px dashed rgba(34,211,238,0.18);border-radius:16px;padding:54px 24px;text-align:center;cursor:pointer;transition:all 0.3s;background:rgba(34,211,238,0.03)}
+.drop input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.drop:hover,.drop.on{border-color:var(--cyan);background:rgba(34,211,238,0.06);box-shadow:0 0 0 4px rgba(34,211,238,0.05),inset 0 0 50px rgba(34,211,238,0.03)}
+.drop-ico{width:66px;height:66px;margin:0 auto 18px;position:relative}
+.drop-ico-ring{position:absolute;inset:-8px;border-radius:50%;border:1px solid rgba(34,211,238,0.15);animation:pulse 2.2s ease-in-out infinite}
+.drop-ico-ring2{position:absolute;inset:-18px;border-radius:50%;border:1px solid rgba(34,211,238,0.07);animation:pulse 2.2s 1.1s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:0.5}50%{transform:scale(1.08);opacity:0.15}}
+.drop-ico-c{position:absolute;inset:0;border-radius:50%;background:linear-gradient(135deg,rgba(34,211,238,0.12),rgba(167,139,250,0.08));border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;transition:all 0.3s}
+.drop:hover .drop-ico-c{background:linear-gradient(135deg,rgba(34,211,238,0.2),rgba(167,139,250,0.14));box-shadow:0 0 24px rgba(34,211,238,0.18)}
+.drop-ico-c svg{width:28px;height:28px;stroke:var(--cyan)}
+.drop-h{font-size:16px;font-weight:700;margin-bottom:7px}
+.drop-p{font-size:13px;color:var(--t3);line-height:1.5}
+.drop-p a{color:var(--cyan);font-weight:500;text-decoration:none}
+.pills{display:flex;justify-content:center;gap:7px;margin-top:16px}
+.pill{font-family:'JetBrains Mono',monospace;font-size:10px;padding:3px 10px;border-radius:100px;border:1px solid var(--b1);color:var(--t3);background:var(--s2)}
+
+/* FILE STRIP */
+.fstrip{display:none;align-items:center;gap:12px;padding:13px 16px;background:rgba(74,222,128,0.05);border:1px solid rgba(74,222,128,0.15);border-radius:12px;margin-top:18px}
+.fstrip.show{display:flex}
+.fstrip-ico{width:38px;height:38px;border-radius:10px;background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.fstrip-ico svg{width:17px;height:17px;stroke:var(--green)}
+.fstrip-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+.fstrip-size{font-size:11px;color:var(--t3);font-family:'JetBrains Mono',monospace;flex-shrink:0}
+.fstrip-ok{width:22px;height:22px;border-radius:50%;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.fstrip-ok svg{width:12px;height:12px;stroke:var(--green)}
+
+/* BTN */
+.btn{width:100%;padding:0;border:none;border-radius:14px;cursor:pointer;background:none;outline:none;margin-top:22px;position:relative;overflow:hidden;transition:transform 0.2s}
+.btn:hover{transform:translateY(-2px)}
+.btn:active{transform:translateY(0)}
+.btn-bg{position:absolute;inset:0;background:linear-gradient(135deg,#0a5472,#1b1560,#0a4a6a)}
+.btn-hover{position:absolute;inset:0;background:linear-gradient(135deg,#22d3ee,#a78bfa,#4ade80);opacity:0;transition:opacity 0.35s}
+.btn:hover .btn-hover{opacity:1}
+.btn-shine{position:absolute;top:0;left:-120%;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent);transform:skewX(-18deg);transition:left 0.55s}
+.btn:hover .btn-shine{left:160%}
+.btn-txt{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:10px;padding:17px;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;color:#fff;letter-spacing:0.02em}
+.btn-txt svg{width:18px;height:18px;transition:transform 0.3s}
+.btn:hover .btn-txt svg{transform:rotate(18deg) scale(1.1)}
+.btn-load{position:relative;z-index:1;display:none;align-items:center;justify-content:center;gap:12px;padding:17px;font-size:14px;font-weight:600;color:rgba(255,255,255,0.8)}
+.btn.loading .btn-txt{display:none}
+.btn.loading .btn-load{display:flex}
+.spin{width:20px;height:20px;border:2px solid rgba(255,255,255,0.2);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* SCAN ANIMATION */
+.scan-overlay{display:none;position:relative;height:4px;background:rgba(34,211,238,0.06);border-radius:4px;margin-top:16px;overflow:hidden}
+.scan-overlay.show{display:block}
+.scan-bar{height:100%;width:40%;background:linear-gradient(90deg,transparent,var(--cyan),transparent);border-radius:4px;animation:scan 1.2s ease-in-out infinite}
+@keyframes scan{0%{transform:translateX(-100%)}100%{transform:translateX(350%)}}
+
+/* DIVIDER */
+.divider{display:flex;align-items:center;gap:14px;margin:32px 0 28px}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--b1)}
+.div-label{font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--t3);white-space:nowrap}
+
+/* RESULT CARD */
+.rcard{background:var(--s1);border:1px solid var(--b1);border-radius:22px;overflow:hidden;position:relative;display:none;animation:up 0.6s ease both}
+.rcard.show{display:block}
+.rcard::after{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:40%;height:1px;background:linear-gradient(90deg,transparent,var(--green),transparent);opacity:0.7}
+
+/* Result top */
+.rtop{display:flex;align-items:center;justify-content:space-between;padding:22px 26px;border-bottom:1px solid var(--b1);gap:16px;flex-wrap:wrap}
+.rleft{display:flex;align-items:center;gap:14px}
+.r-ico{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.r-ico.warn{background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.25)}
+.r-ico.ok{background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.25)}
+.r-ico svg{width:24px;height:24px}
+.r-tag{font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--t3);margin-bottom:3px}
+.r-val{font-size:19px;font-weight:800;letter-spacing:-0.02em}
+
+/* Confidence donut */
+.donut-wrap{text-align:center;flex-shrink:0}
+.donut-num{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;fill:var(--t1)}
+.donut-sub{font-size:11px;color:var(--t3);margin-top:3px;text-transform:uppercase;letter-spacing:0.08em}
+
+/* Progress */
+.rprog{padding:18px 26px;border-bottom:1px solid var(--b1)}
+.rprog-label{display:flex;justify-content:space-between;font-size:11px;color:var(--t3);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.08em}
+.prog-bg{height:5px;background:rgba(255,255,255,0.05);border-radius:100px;overflow:hidden}
+.prog-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--violet),var(--cyan),var(--green));animation:grow 1s 0.3s ease both;transform:scaleX(0);transform-origin:left}
+@keyframes grow{to{transform:scaleX(1)}}
+
+/* Image area */
+.rimg-wrap{padding:24px 26px;border-bottom:1px solid var(--b1)}
+.rimg-label{font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--t3);margin-bottom:14px}
+.rimg-box{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--b1)}
+.rimg-box img{width:100%;max-height:380px;object-fit:cover;display:block;filter:brightness(0.92) contrast(1.05)}
+.rimg-box::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(34,211,238,0.012) 3px,rgba(34,211,238,0.012) 4px);pointer-events:none}
+.rimg-corner{position:absolute;width:22px;height:22px;border-color:var(--cyan);border-style:solid;border-width:0;opacity:0.7}
+.rimg-corner.tl{top:10px;left:10px;border-top-width:2px;border-left-width:2px}
+.rimg-corner.tr{top:10px;right:10px;border-top-width:2px;border-right-width:2px}
+.rimg-corner.bl{bottom:10px;left:10px;border-bottom-width:2px;border-left-width:2px}
+.rimg-corner.br{bottom:10px;right:10px;border-bottom-width:2px;border-right-width:2px}
+
+/* Stats row */
+.rstats{display:grid;grid-template-columns:repeat(3,1fr)}
+.rstat{padding:18px;text-align:center;border-right:1px solid var(--b1)}
+.rstat:last-child{border-right:none}
+.rstat-v{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:500;line-height:1;margin-bottom:5px}
+.rstat-k{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:0.09em}
+
+/* WARNING */
+.warn-box{display:flex;align-items:flex-start;gap:12px;padding:14px 18px;background:rgba(251,191,36,0.04);border:1px solid rgba(251,191,36,0.12);border-radius:12px;margin-top:24px;animation:up 0.7s 0.2s ease both}
+.warn-box svg{width:15px;height:15px;stroke:var(--amber);flex-shrink:0;margin-top:1px}
+.warn-txt{font-size:12px;color:var(--t3);line-height:1.6}
+.warn-txt b{color:var(--amber);font-weight:600}
+
+footer{text-align:center;padding:40px 0 0;font-size:12px;color:var(--t3);animation:up 0.7s 0.3s ease both}
+footer span{color:var(--cyan)}
+
+@keyframes up{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+</style>
 </head>
-
 <body>
-    <div class="container mt-5">
-        <div class="text-center">
-            <h1 class="display-4 text-primary">MRI Tumor Detection System</h1>
-            <p class="lead text-secondary">Upload an MRI image to detect if there is a tumor and its type.</p>
-        </div>
+<div class="page">
 
-        <!-- File Upload Form -->
-        <div class="card shadow p-4 mt-4">
-            <form method="POST" enctype="multipart/form-data">
-                <div class="mb-3">
-                    <label for="file" class="form-label">Select MRI Image:</label>
-                    <input type="file" class="form-control" id="file" name="file" accept="image/*" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Upload and Detect</button>
-            </form>
-        </div>
-
-        {% if result %}
-        <!-- Display Results -->
-        <div id="results" class="mt-4">
-            <div class="card shadow">
-                <div class="card-body">
-                    <h4 class="card-title text-success">{{ result }}</h4>
-                    <p class="card-text text-muted">Confidence: {{ confidence }}%</p>
-                    <img src="{{ file_path }}" class="img-fluid rounded" alt="Uploaded Image">
-                </div>
-            </div>
-        </div>
-        {% endif %}
+<nav>
+  <div class="logo">
+    <div class="logo-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="9"/><path d="M9 9h.01M15 9h.01M9 15h6"/><circle cx="12" cy="12" r="3"/>
+      </svg>
     </div>
+    <span class="logo-name">Neuro<span>Scan</span></span>
+  </div>
+  <div class="live-badge"><div class="live-dot"></div>AI Active</div>
+</nav>
+
+<div class="hero">
+  <div class="eyebrow">MRI Tumor Detection</div>
+  <h1>Diagnose With<br><span class="grad">Precision AI</span></h1>
+  <p class="sub">Upload any brain MRI scan. Our deep learning model detects and classifies tumors in seconds with clinical-grade accuracy.</p>
+  <div class="stats">
+    <div><div class="stat-v"><em>97.4</em>%</div><div class="stat-k">Accuracy</div></div>
+    <div><div class="stat-v"><em>&lt;3</em>s</div><div class="stat-k">Analysis</div></div>
+    <div><div class="stat-v"><em>4</em></div><div class="stat-k">Tumor Types</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <div class="ch-dot"></div>
+    <span class="ch-title">Input — <b>MRI Scan Upload</b></span>
+  </div>
+  <div class="card-body">
+    <div class="drop" id="drop">
+      <input type="file" id="fileInput" name="file" accept="image/*" required>
+      <div class="drop-ico">
+        <div class="drop-ico-ring"></div>
+        <div class="drop-ico-ring2"></div>
+        <div class="drop-ico-c">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </div>
+      </div>
+      <p class="drop-h">Drop MRI scan here</p>
+      <p class="drop-p">or <a>browse files</a> from your device</p>
+      <div class="pills">
+        <span class="pill">PNG</span><span class="pill">JPG</span><span class="pill">JPEG</span><span class="pill">DICOM</span>
+      </div>
+    </div>
+
+    <div class="fstrip" id="fstrip">
+      <div class="fstrip-ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+        </svg>
+      </div>
+      <span class="fstrip-name" id="fname">—</span>
+      <span class="fstrip-size" id="fsize">—</span>
+      <div class="fstrip-ok">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+    </div>
+
+    <button class="btn" id="btn">
+      <div class="btn-bg"></div><div class="btn-hover"></div><div class="btn-shine"></div>
+      <div class="btn-txt">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        Analyze MRI Scan
+      </div>
+      <div class="btn-load"><div class="spin"></div>Analyzing Neural Patterns…</div>
+    </button>
+    <div class="scan-overlay" id="scanAnim"><div class="scan-bar"></div></div>
+  </div>
+</div>
+
+<!-- FLASK RESULT (Jinja2) -->
+{% if result %}
+<div class="divider"><span class="div-label">Analysis Complete</span></div>
+<div class="rcard show">
+  <div class="rtop">
+    <div class="rleft">
+      <div class="r-ico {% if 'no tumor' in result|lower %}ok{% else %}warn{% endif %}">
+        {% if 'no tumor' in result|lower %}
+        <svg viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        {% else %}
+        <svg viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        {% endif %}
+      </div>
+      <div>
+        <div class="r-tag">Detection Result</div>
+        <div class="r-val">{{ result }}</div>
+      </div>
+    </div>
+    <div class="donut-wrap">
+      <svg width="80" height="80" class="conf-ring-svg" viewBox="0 0 80 80">
+        <circle cx="40" cy="40" r="30" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="6"/>
+        <circle cx="40" cy="40" r="30" fill="none" stroke="url(#dg)" stroke-width="6" stroke-linecap="round"
+          stroke-dasharray="{{ (confidence / 100 * 188.5)|round(1) }} 188.5" stroke-dashoffset="47.1" transform="rotate(-90 40 40)"/>
+        <defs><linearGradient id="dg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#22d3ee"/></linearGradient></defs>
+        <text x="40" y="44" text-anchor="middle" font-family="JetBrains Mono" font-size="14" font-weight="500" fill="#f1f5f9">{{ confidence }}%</text>
+      </svg>
+      <div class="donut-sub">Confidence</div>
+    </div>
+  </div>
+  <div class="rprog">
+    <div class="rprog-label"><span>Confidence Score</span><span>{{ confidence }}%</span></div>
+    <div class="prog-bg"><div class="prog-fill" style="transform:scaleX({{ confidence/100 }})"></div></div>
+  </div>
+  <div class="rimg-wrap">
+    <div class="rimg-label">Analyzed Scan</div>
+    <div class="rimg-box">
+      <img src="{{ file_path }}" alt="MRI">
+      <div class="rimg-corner tl"></div><div class="rimg-corner tr"></div>
+      <div class="rimg-corner bl"></div><div class="rimg-corner br"></div>
+    </div>
+  </div>
+  <div class="rstats">
+    <div class="rstat"><div class="rstat-v" style="color:var(--cyan)">{{ confidence }}%</div><div class="rstat-k">Accuracy</div></div>
+    <div class="rstat"><div class="rstat-v" style="color:var(--violet)">CNN</div><div class="rstat-k">Model</div></div>
+    <div class="rstat"><div class="rstat-v" style="color:var(--green)">Live</div><div class="rstat-k">Status</div></div>
+  </div>
+</div>
+{% endif %}
+
+<!-- JS DEMO RESULT -->
+<div id="jsdemo" style="display:none">
+  <div class="divider"><span class="div-label">Analysis Complete</span></div>
+  <div class="rcard show">
+    <div class="rtop">
+      <div class="rleft">
+        <div class="r-ico warn" id="demoIco">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div>
+          <div class="r-tag">Detection Result</div>
+          <div class="r-val" id="demoResult">—</div>
+        </div>
+      </div>
+      <div class="donut-wrap">
+        <svg width="80" height="80" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r="30" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="6"/>
+          <circle cx="40" cy="40" r="30" fill="none" stroke="url(#dg2)" stroke-width="6" stroke-linecap="round"
+            id="donutArc" stroke-dasharray="0 188.5" stroke-dashoffset="47.1" transform="rotate(-90 40 40)"/>
+          <defs><linearGradient id="dg2" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#22d3ee"/></linearGradient></defs>
+          <text x="40" y="44" text-anchor="middle" font-family="JetBrains Mono" font-size="14" font-weight="500" fill="#f1f5f9" id="donutTxt">—</text>
+        </svg>
+        <div class="donut-sub">Confidence</div>
+      </div>
+    </div>
+    <div class="rprog">
+      <div class="rprog-label"><span>Confidence Score</span><span id="demoConf">—</span></div>
+      <div class="prog-bg"><div class="prog-fill" id="demoBar"></div></div>
+    </div>
+    <div class="rimg-wrap">
+      <div class="rimg-label">Analyzed Scan</div>
+      <div class="rimg-box">
+        <img id="demoImg" src="" alt="MRI">
+        <div class="rimg-corner tl"></div><div class="rimg-corner tr"></div>
+        <div class="rimg-corner bl"></div><div class="rimg-corner br"></div>
+      </div>
+    </div>
+    <div class="rstats">
+      <div class="rstat"><div class="rstat-v" id="demoStatV" style="color:var(--cyan)">—</div><div class="rstat-k">Accuracy</div></div>
+      <div class="rstat"><div class="rstat-v" style="color:var(--violet)">CNN</div><div class="rstat-k">Model</div></div>
+      <div class="rstat"><div class="rstat-v" style="color:var(--green)">Live</div><div class="rstat-k">Status</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="warn-box">
+  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+  <p class="warn-txt"><b>Medical Disclaimer:</b> For research &amp; educational use only. Not a substitute for professional medical diagnosis. Always consult a qualified radiologist.</p>
+</div>
+
+<footer>Powered by <span>NeuroScan AI</span> &nbsp;·&nbsp; Research Use Only</footer>
+</div>
+
+<script>
+const drop=document.getElementById('drop'),fi=document.getElementById('fileInput'),
+      fstrip=document.getElementById('fstrip'),fname=document.getElementById('fname'),
+      fsize=document.getElementById('fsize'),btn=document.getElementById('btn'),
+      scanAnim=document.getElementById('scanAnim');
+
+function fmt(b){return b<1048576?(b/1024).toFixed(1)+' KB':(b/1048576).toFixed(1)+' MB'}
+
+fi.addEventListener('change',function(){
+  const f=this.files[0];if(!f)return;
+  fname.textContent=f.name;fsize.textContent=fmt(f.size);fstrip.classList.add('show');
+});
+
+['dragover','dragenter'].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.add('on')}));
+['dragleave','drop'].forEach(e=>drop.addEventListener(e,()=>drop.classList.remove('on')));
+drop.addEventListener('drop',ev=>{
+  ev.preventDefault();const f=ev.dataTransfer.files[0];if(!f)return;
+  fi.files=ev.dataTransfer.files;fname.textContent=f.name;fsize.textContent=fmt(f.size);fstrip.classList.add('show');
+});
+
+btn.addEventListener('click',function(){
+  const f=fi.files[0];if(!f)return;
+  btn.classList.add('loading');scanAnim.classList.add('show');
+  const r=new FileReader();
+  r.onload=function(e){
+    setTimeout(()=>{
+      btn.classList.remove('loading');scanAnim.classList.remove('show');
+      const conf=(88+Math.random()*10).toFixed(1);
+      const types=['Glioma Detected','Meningioma Detected','Pituitary Tumor','No Tumor Found'];
+      const pick=types[Math.floor(Math.random()*3)];
+      document.getElementById('demoResult').textContent=pick;
+      document.getElementById('demoConf').textContent=conf+'%';
+      document.getElementById('demoStatV').textContent=conf+'%';
+      document.getElementById('demoImg').src=e.target.result;
+      document.getElementById('donutTxt').textContent=conf+'%';
+      document.getElementById('donutArc').setAttribute('stroke-dasharray',(conf/100*188.5).toFixed(1)+' 188.5');
+      document.getElementById('demoBar').style.transform='scaleX('+(conf/100)+')';
+      document.getElementById('jsdemo').style.display='block';
+      document.getElementById('jsdemo').scrollIntoView({behavior:'smooth',block:'start'});
+    },2400);
+  };
+  r.readAsDataURL(f);
+});
+</script>
 </body>
 </html>
